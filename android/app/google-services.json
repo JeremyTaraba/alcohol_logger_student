@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "484907298486",
+    "project_id": "alcohol-logger",
+    "storage_bucket": "alcohol-logger.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:484907298486:android:d8bd0f5875f90ec4a70017",
+        "android_client_info": {
+          "package_name": "com.example.alcohol_logger"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "484907298486-bg9e8ap11g28tdordklq8g5ncips1616.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrvKQk5fjKhwcBBy14iWhZQ2h49NzPJ94"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "484907298486-bg9e8ap11g28tdordklq8g5ncips1616.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
