@@ -68,9 +68,9 @@ class HomeScreen extends StatelessWidget {
                   height: 300,
                   width: 350,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border:
-                          Border.all(color: Colors.lightBlueAccent, width: 3)),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.lightBlueAccent, width: 3),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
@@ -78,15 +78,16 @@ class HomeScreen extends StatelessWidget {
                         const Align(
                           alignment: Alignment.topLeft,
                           child: Text(
-                            "Overview:",
-                            style: TextStyle(fontSize: 24),
+                            "Ounces:",
+                            style: TextStyle(fontSize: 22),
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(
                               top: 20.0, left: 5, right: 5),
                           child: SfSparkBarChart(
-                            axisLineColor: Colors.white,
+                            labelDisplayMode: SparkChartLabelDisplayMode.all,
+                            axisLineColor: Colors.transparent,
                             data: <double>[
                               10,
                               6,
@@ -97,8 +98,53 @@ class HomeScreen extends StatelessWidget {
                               2,
                             ],
                             color: Colors.lightBlueAccent,
-                            lastPointColor: Colors.greenAccent,
                           ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text("Sun"),
+                              Text("Mon"),
+                              Text("Tue"),
+                              Text("Wed"),
+                              Text("Thur"),
+                              Text("Fri"),
+                              Text("Sat"),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: Container(
+                  height: 200,
+                  width: 350,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.lightBlueAccent, width: 3),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Beer: 40oz",
+                          style: TextStyle(fontSize: 24),
+                        ),
+                        Text(
+                          "Red Wine: 10oz",
+                          style: TextStyle(fontSize: 24),
+                        ),
+                        Text(
+                          "White Wine: 8oz",
+                          style: TextStyle(fontSize: 24),
                         ),
                       ],
                     ),
