@@ -1,9 +1,21 @@
 import 'package:alcohol_logger/utility/bottomNav.dart';
 import 'package:flutter/material.dart';
 
-class ProfileScreen extends StatelessWidget {
+const List<String> list = <String>[
+  'Prefer not to say',
+  'Male',
+  'Female',
+];
+
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String dropdownValue = list.first;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -35,21 +47,45 @@ class ProfileScreen extends StatelessWidget {
                           Border.all(color: Colors.lightBlueAccent, width: 3),
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(
-                          width: 32,
+                        DropdownButton<String>(
+                          value: dropdownValue,
+                          icon: const Icon(Icons.arrow_drop_down),
+                          elevation: 0,
+                          style: const TextStyle(
+                              fontSize: 24, color: Colors.black),
+                          onChanged: (String? value) {
+                            // This is called when the user selects an item.
+                            setState(() {
+                              dropdownValue = value!;
+                            });
+                          },
+                          items: list
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
                         ),
-                        Text(
-                          "Male",
-                          style: TextStyle(fontSize: 24),
-                        ),
-                        Icon(Icons.arrow_drop_down),
                       ],
                     ),
                   ),
                 ),
                 profileData("Email", "email@gmail.com"),
+                Padding(
+                  padding: const EdgeInsets.only(top: 15.0),
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: ElevatedButton(
+                        onPressed: () {},
+                        child: Text(
+                          "Logout",
+                          style: TextStyle(fontSize: 24),
+                        )),
+                  ),
+                )
               ],
             ),
           ),
