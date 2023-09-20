@@ -1,16 +1,26 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:tflite_flutter/tflite_flutter.dart';
 
 class ImagePreviewScreen extends StatefulWidget {
-  ImagePreviewScreen({super.key, required this.picture});
-  XFile picture;
+  const ImagePreviewScreen({super.key, required this.picture});
+  final XFile picture;
 
   @override
   State<ImagePreviewScreen> createState() => _ImagePreviewScreenState();
 }
 
 class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
+
+  late final Interpreter interpreter;
+
+  late Tensor inputTensor;
+
+  late Tensor outputTensor;
+
+  late final List<String> labels;
+
   @override
   Widget build(BuildContext context) {
     File pictureTaken = File(widget.picture.path);
