@@ -1,7 +1,10 @@
+import 'package:alcohol_logger/helper/image_classification_helper.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:tflite_flutter/tflite_flutter.dart';
+import 'package:image/image.dart' as img;
 
 class ImagePreviewScreen extends StatefulWidget {
   const ImagePreviewScreen({super.key, required this.picture});
@@ -12,14 +15,53 @@ class ImagePreviewScreen extends StatefulWidget {
 }
 
 class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
-
   late final Interpreter interpreter;
 
   late Tensor inputTensor;
 
   late Tensor outputTensor;
 
+  img.Image? image;
+
   late final List<String> labels;
+
+  bool _isProcessing = false;
+
+  late Map<String, double> classification;
+
+  late ImageClassificationHelper imageClassificationHelper;
+
+  @override
+  void initState() {
+    super.initState();
+    tensorFlowSetup();
+    _loadLabels();
+    imageClassificationHelper = ImageClassificationHelper();
+    imageClassificationHelper.initHelper();
+  }
+
+  List<String> sortClassifications() {
+    List<String> sortedResults = [];
+    double highestPercentage = 0.0;
+    int index = 0;
+    int index2 = 0;
+    classification.forEach((key, value) {
+      if (value > highestPercentage) {
+        highestPercentage = value;
+        sortedResults.add(key);
+        index = index2 + 1;
+      } else {
+        sortedResults.add(key);
+      }
+      index2++;
+    });
+
+    String temp = sortedResults[0];
+    sortedResults[0] = sortedResults[index - 1];
+    sortedResults[index - 1] = temp;
+
+    return sortedResults;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +92,11 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: FloatingActionButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    await processImage(pictureTaken);
+                    print(sortClassifications());
+                    _dialogBuilder(context);
+                  },
                   child: const Text(
                     "Analyze",
                     style: TextStyle(fontSize: 24),
@@ -61,6 +107,63 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> tensorFlowSetup() async {
+    interpreter = await Interpreter.fromAsset("assets/model.tflite");
+    inputTensor = interpreter.getInputTensors().first;
+    outputTensor = interpreter.getOutputTensors().first;
+    image = img.decodeImage(await File(widget.picture.path).readAsBytes());
+  }
+
+  Future<void> _loadLabels() async {
+    final labelText = await rootBundle.loadString("assets/labels.txt");
+    labels = labelText.split("\n");
+  }
+
+  Future<void> processImage(File imagePath) async {
+    final imageData = imagePath.readAsBytesSync();
+    image = img.decodeImage(imageData);
+    setState(() {});
+    classification = await imageClassificationHelper.inferenceImage(image!);
+    setState(() {});
+  }
+
+  Future<void> _dialogBuilder(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Drink'),
+          content: const Text(
+            'A dialog is a type of modal window that\n'
+            'appears in front of app content to\n'
+            'provide critical information, or prompt\n'
+            'for a decision to be made.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Confirm'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
