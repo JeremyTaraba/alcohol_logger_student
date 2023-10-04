@@ -30,6 +30,8 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
   late Map<String, double> classification;
 
   late ImageClassificationHelper imageClassificationHelper;
+  List<bool> lights = [];
+  List<String> finalClassification = [];
 
   @override
   void initState() {
@@ -95,6 +97,11 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
                   onPressed: () async {
                     await processImage(pictureTaken);
                     print(sortClassifications());
+                    finalClassification = sortClassifications();
+                    for (int i = 0; i < finalClassification.length; i++) {
+                      lights.add(false);
+                    }
+                    lights[0] = true;
                     _dialogBuilder(context);
                   },
                   child: const Text(
@@ -134,35 +141,68 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirm Drink'),
-          content: const Text(
-            'A dialog is a type of modal window that\n'
-            'appears in front of app content to\n'
-            'provide critical information, or prompt\n'
-            'for a decision to be made.',
-          ),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Confirm Drink'),
+            content: SizedBox(
+              height: 300,
+              width: 100,
+              child: ListView.separated(
+                itemCount: finalClassification.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.blue),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(finalClassification[index]),
+                          Switch(
+                            value: lights[index],
+                            activeColor: Colors.green,
+                            onChanged: (bool value) {
+                              setState(() {
+                                for (int i = 0; i < lights.length; i++) {
+                                  lights[i] = false;
+                                }
+                                lights[index] = value;
+                              });
+                            },
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                separatorBuilder: (BuildContext context, int index) => const Divider(),
               ),
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
             ),
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
+            actions: <Widget>[
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
               ),
-              child: const Text('Confirm'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('Confirm'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
       },
     );
   }
