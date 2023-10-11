@@ -1,10 +1,27 @@
 import 'package:alcohol_logger/helper/image_classification_helper.dart';
 import 'package:camera/camera.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
+import 'package:firebase_auth/firebase_auth.dart';
+
+final _firestore = FirebaseFirestore.instance; //for the database
+final auth = FirebaseAuth.instance;
+late User loggedInUser;
+
+Future<void> getCurrentUser() async {
+  try {
+    final user = await auth.currentUser;
+    if (user != null) {
+      loggedInUser = user;
+    }
+  } catch (e) {
+    print(e);
+  }
+}
 
 class ImagePreviewScreen extends StatefulWidget {
   const ImagePreviewScreen({super.key, required this.picture});
@@ -33,11 +50,15 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
   List<bool> lights = [];
   List<String> finalClassification = [];
 
+  int ouncesEntered = 0;
+  String drinkSelected = "";
+
   @override
   void initState() {
     super.initState();
     tensorFlowSetup();
     _loadLabels();
+    getCurrentUser();
     imageClassificationHelper = ImageClassificationHelper();
     imageClassificationHelper.initHelper();
   }
@@ -70,6 +91,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
     File pictureTaken = File(widget.picture.path);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: Colors.lightBlueAccent,
         title: Text("Image Preview"),
@@ -102,6 +124,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
                       lights.add(false);
                     }
                     lights[0] = true;
+                    drinkSelected = finalClassification[0];
                     _dialogBuilder(context);
                   },
                   child: const Text(
@@ -144,41 +167,56 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
         return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
             title: const Text('Confirm Drink'),
-            content: SizedBox(
-              height: 300,
-              width: 100,
-              child: ListView.separated(
-                itemCount: finalClassification.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.blue),
+            content: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 300,
+                    width: 300,
+                    child: ListView.separated(
+                      itemCount: finalClassification.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.blue),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(finalClassification[index]),
+                                Switch(
+                                  value: lights[index],
+                                  activeColor: Colors.green,
+                                  onChanged: (bool value) {
+                                    setState(() {
+                                      for (int i = 0; i < lights.length; i++) {
+                                        lights[i] = false;
+                                      }
+                                      lights[index] = value;
+                                      drinkSelected = finalClassification[index];
+                                    });
+                                  },
+                                )
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      separatorBuilder: (BuildContext context, int index) => const Divider(),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(finalClassification[index]),
-                          Switch(
-                            value: lights[index],
-                            activeColor: Colors.green,
-                            onChanged: (bool value) {
-                              setState(() {
-                                for (int i = 0; i < lights.length; i++) {
-                                  lights[i] = false;
-                                }
-                                lights[index] = value;
-                              });
-                            },
-                          )
-                        ],
-                      ),
-                    ),
-                  );
-                },
-                separatorBuilder: (BuildContext context, int index) => const Divider(),
+                  ),
+                  TextField(
+                    decoration: InputDecoration(hintText: "Enter ounces"),
+                    onChanged: (value) {
+                      ouncesEntered = int.parse(value);
+                    },
+                    keyboardType: TextInputType.numberWithOptions(signed: false, decimal: false),
+                  ),
+                ],
               ),
             ),
             actions: <Widget>[
@@ -196,8 +234,13 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
                   textStyle: Theme.of(context).textTheme.labelLarge,
                 ),
                 child: const Text('Confirm'),
-                onPressed: () {
-                  Navigator.of(context).pop();
+                onPressed: () async {
+                  var docRef = _firestore.collection("drinks").doc(loggedInUser.email);
+                  DocumentSnapshot doc = await docRef.get();
+                  final data = doc.data() as Map<String, dynamic>;
+                  Map<String, int> submittedInfo = {drinkSelected: ouncesEntered};
+                  String date = DateTime.now().toString().split(" ")[0];
+                  await docRef.set({date: submittedInfo}, SetOptions(merge: true));
                 },
               ),
             ],
