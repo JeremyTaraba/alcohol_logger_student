@@ -1,4 +1,5 @@
 import 'package:alcohol_logger/utility/bottomNav.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 const List<String> list = <String>[
@@ -6,6 +7,8 @@ const List<String> list = <String>[
   'Male',
   'Female',
 ];
+
+final auth = FirebaseAuth.instance;
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -43,8 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     height: 50,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
-                      border:
-                          Border.all(color: Colors.lightBlueAccent, width: 3),
+                      border: Border.all(color: Colors.lightBlueAccent, width: 3),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -53,16 +55,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           value: dropdownValue,
                           icon: const Icon(Icons.arrow_drop_down),
                           elevation: 0,
-                          style: const TextStyle(
-                              fontSize: 24, color: Colors.black),
+                          style: const TextStyle(fontSize: 24, color: Colors.black),
                           onChanged: (String? value) {
                             // This is called when the user selects an item.
                             setState(() {
                               dropdownValue = value!;
                             });
                           },
-                          items: list
-                              .map<DropdownMenuItem<String>>((String value) {
+                          items: list.map<DropdownMenuItem<String>>((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
                               child: Text(value),
@@ -79,7 +79,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          auth.signOut();
+                          Navigator.pop(context);
+                        },
                         child: Text(
                           "Logout",
                           style: TextStyle(fontSize: 24),

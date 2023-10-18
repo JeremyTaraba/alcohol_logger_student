@@ -52,6 +52,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
 
   int ouncesEntered = 0;
   String drinkSelected = "";
+  int count = 0;
 
   @override
   void initState() {
@@ -241,6 +242,9 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
                   Map<String, int> submittedInfo = {drinkSelected: ouncesEntered};
                   String date = DateTime.now().toString().split(" ")[0];
                   await docRef.set({date: submittedInfo}, SetOptions(merge: true));
+                  Navigator.popUntil(context, (route) {
+                    return count++ == 2;
+                  });
                 },
               ),
             ],

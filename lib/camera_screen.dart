@@ -1,3 +1,4 @@
+import 'package:alcohol_logger/felix_image_preview_screen.dart';
 import 'package:alcohol_logger/image_preview_screen.dart';
 import 'package:alcohol_logger/utility/bottomNav.dart';
 import 'package:flutter/material.dart';
@@ -55,11 +56,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
                             await _controller.setFocusMode(FocusMode.locked);
 
-                            await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ImagePreviewScreen(picture: picture)));
+                            await Navigator.push(context, MaterialPageRoute(builder: (context) => ImagePreviewScreen(picture: picture)));
                           } on CameraException catch (e) {
                             print(e);
                             return;
@@ -84,8 +81,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   Future<bool> cameraSetup() async {
     cameras = await availableCameras();
-    _controller =
-        CameraController(cameras[0], ResolutionPreset.high, enableAudio: false);
+    _controller = CameraController(cameras[0], ResolutionPreset.high, enableAudio: false);
 
     _controller.initialize().then((value) {
       if (!mounted) {
