@@ -1,10 +1,61 @@
 import 'package:alcohol_logger/utility/bottomNav.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
-class HomeScreen extends StatelessWidget {
+final _firestore = FirebaseFirestore.instance; //for the database
+final auth = FirebaseAuth.instance;
+late User loggedInUser;
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String todaysDate = "";
+  String firstDayOfWeek = "";
+  List<int> weeklyLog = [];
+
+  @override
+  void initState() {
+    super.initState();
+    todaysDate = DateTime.now().toString().split(" ")[0];
+    firstDayOfWeek = DateTime.now().subtract(Duration(days: DateTime.now().weekday)).toString().split(" ")[0];
+
+    getWeeklyLog(firstDayOfWeek);
+  }
+
+  getWeeklyLog(String day) async {
+    try {
+      final user = await auth.currentUser;
+      if (user != null) {
+        loggedInUser = user;
+      }
+      var docRef = _firestore.collection('drinks').doc(loggedInUser.email);
+      DocumentSnapshot doc = await docRef.get();
+      final data = await doc.data() as Map<String, dynamic>;
+      for (int i = 0; i < 7; i++) {
+        if (data.keys.contains(day)) {
+          int sum = 0;
+          data[day].forEach((innerKey, innerValue) {
+            // goes through each drink at date
+            sum += innerValue as int;
+          });
+          weeklyLog.add(sum);
+        } else {
+          weeklyLog.add(0);
+        }
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,19 +94,12 @@ class HomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Text(
-                        "August 20 - 27",
+                        "$todaysDate",
                         style: TextStyle(fontSize: 28),
                       ),
-                      Icon(
-                        Icons.arrow_drop_down,
-                        size: 50,
-                      )
                     ],
                   ),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border:
-                          Border.all(color: Colors.lightBlueAccent, width: 3)),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.lightBlueAccent, width: 3)),
                 ),
               ),
               Padding(
@@ -83,8 +127,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(
-                              top: 20.0, left: 5, right: 5),
+                          padding: const EdgeInsets.only(top: 20.0, left: 5, right: 5),
                           child: SfSparkBarChart(
                             labelDisplayMode: SparkChartLabelDisplayMode.all,
                             axisLineColor: Colors.transparent,
@@ -157,6 +200,22 @@ class HomeScreen extends StatelessWidget {
             selectedIndex: 1,
           ),
         ),
+      ),
+    );
+  }
+
+  Container datePicker() {
+    return Container(
+      height: 300,
+      width: 300,
+      child: SfDateRangePicker(
+        initialSelectedDate: DateTime.now(),
+        onSubmit: (value) {
+          Navigator.pop(context);
+        },
+        onCancel: () {
+          Navigator.pop(context);
+        },
       ),
     );
   }
