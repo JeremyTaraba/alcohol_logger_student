@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +21,19 @@ class _LoginScreenState extends State<LoginScreen> {
   String password = "";
   final _auth = FirebaseAuth.instance;
   bool showSpinner = false;
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSecureStorageData();
+  }
+
+  fetchSecureStorageData() async {
+    Map<String, String> loginCredentials = await _storage.readAll();
+    email = loginCredentials.keys.toList().first;
+    password = loginCredentials[email]!;
+  }
 
   SnackBar snackBar(String error) {
     return SnackBar(
@@ -59,8 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 200,
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(
-                        top: 25, left: 10, right: 10, bottom: 25),
+                    padding: const EdgeInsets.only(top: 25, left: 10, right: 10, bottom: 25),
                     child: TextField(
                         onChanged: (value) {
                           email = value;
@@ -68,12 +81,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(fontSize: 22),
                         autocorrect: false,
                         keyboardType: TextInputType.emailAddress,
-                        decoration:
-                            kTextFieldDecoration().copyWith(hintText: "Email")),
+                        decoration: kTextFieldDecoration().copyWith(hintText: "Email")),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsets.only(left: 10, right: 10, bottom: 25),
+                    padding: const EdgeInsets.only(left: 10, right: 10, bottom: 25),
                     child: TextField(
                         onChanged: (value) {
                           password = value;
@@ -82,8 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         autocorrect: false,
                         obscureText: true,
                         keyboardType: TextInputType.text,
-                        decoration: kTextFieldDecoration()
-                            .copyWith(hintText: "Password")),
+                        decoration: kTextFieldDecoration().copyWith(hintText: "Password")),
                   ),
                   Center(
                     child: LoginButton(
@@ -92,13 +102,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           showSpinner = true;
                         });
                         try {
-                          final user = await _auth.signInWithEmailAndPassword(
-                              email: email, password: password);
+                          final user = await _auth.signInWithEmailAndPassword(email: email, password: password);
                           if (user != null) {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => HomeScreen()));
+                            _storage.write(key: email, value: password);
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
                           }
                         } catch (e) {
                           print(e);
@@ -138,15 +145,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => SignupScreen()));
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SignupScreen()));
                               },
                               child: Text(
                                 "Sign up",
-                                style:
-                                    TextStyle(color: Colors.blue, fontSize: 20),
+                                style: TextStyle(color: Colors.blue, fontSize: 20),
                               ),
                             ),
                           ],

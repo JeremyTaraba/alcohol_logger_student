@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:jiffy/jiffy.dart';
 
 final _firestore = FirebaseFirestore.instance; //for the database
 final auth = FirebaseAuth.instance;
@@ -40,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
       var docRef = _firestore.collection('drinks').doc(loggedInUser.email);
       DocumentSnapshot doc = await docRef.get();
       final data = await doc.data() as Map<String, dynamic>;
+
       for (int i = 0; i < 7; i++) {
         if (data.keys.contains(day)) {
           int sum = 0;
@@ -47,10 +49,19 @@ class _HomeScreenState extends State<HomeScreen> {
             // goes through each drink at date
             sum += innerValue as int;
           });
-          weeklyLog.add(sum);
+
+          setState(() {
+            weeklyLog.add(sum);
+          });
         } else {
-          weeklyLog.add(0);
+          setState(() {
+            weeklyLog.add(0);
+          });
         }
+        // update to next day
+        DateTime nextDay = DateTime.parse(day + " 10:00:00.000");
+        nextDay = Jiffy.parseFromDateTime(nextDay).add(days: 1).dateTime;
+        day = nextDay.toString().split(" ")[0];
       }
     } catch (e) {
       print(e);
@@ -131,15 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: SfSparkBarChart(
                             labelDisplayMode: SparkChartLabelDisplayMode.all,
                             axisLineColor: Colors.transparent,
-                            data: <double>[
-                              10,
-                              6,
-                              8,
-                              5,
-                              11,
-                              5,
-                              2,
-                            ],
+                            data: weeklyLog.isNotEmpty ? weeklyLog : [0, 0, 0, 0, 0, 0, 0],
                             color: Colors.lightBlueAccent,
                           ),
                         ),

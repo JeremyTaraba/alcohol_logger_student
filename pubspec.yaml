@@ -49,6 +49,8 @@ dependencies:
   tflite_flutter: ^0.10.1
   table_calendar: ^3.0.9
   syncfusion_flutter_datepicker: ^22.2.10
+  jiffy: ^6.2.1
+  flutter_secure_storage: ^9.0.0
 
 
 
