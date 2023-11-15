@@ -1,6 +1,8 @@
 import 'package:alcohol_logger/utility/bottomNav.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const List<String> list = <String>[
   'Prefer not to say',
@@ -9,6 +11,11 @@ const List<String> list = <String>[
 ];
 
 final auth = FirebaseAuth.instance;
+final FlutterSecureStorage _storage = FlutterSecureStorage();
+int count = 0;
+late User loggedInUser;
+final _firestore = FirebaseFirestore.instance;
+Map<String, dynamic> userInformation = {};
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,6 +26,31 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String dropdownValue = list.first;
+
+  getUserInfo(Map<String, dynamic> userInformation) async {
+    try {
+      final user = await auth.currentUser;
+      if (user != null) {
+        loggedInUser = user;
+      }
+      var docRef = _firestore.collection('userData').doc(loggedInUser.email);
+      DocumentSnapshot doc = await docRef.get();
+      final data = await doc.data() as Map<String, dynamic>;
+      setState(() {
+        userInformation = data;
+        print(userInformation);
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUserInfo(userInformation);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -30,8 +62,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                profileData("Name", "Name goes here"),
-                profileData("Age", "22"),
+                profileData("Name", userInformation["name"] == null ? "" : "hi"),
+                profileData("Weight", "100"),
                 const Padding(
                   padding: EdgeInsets.only(left: 30.0),
                   child: Text(
@@ -73,15 +105,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                 ),
-                profileData("Email", "email@gmail.com"),
+                profileData("Email", auth.currentUser?.email ?? 'hello'),
                 Padding(
                   padding: const EdgeInsets.only(top: 15.0),
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           auth.signOut();
-                          Navigator.pop(context);
+                          await _storage.deleteAll();
+                          Navigator.popUntil(context, (route) {
+                            return count++ == 2;
+                          });
                         },
                         child: Text(
                           "Logout",

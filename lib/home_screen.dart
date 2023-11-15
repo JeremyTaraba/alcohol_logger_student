@@ -1,4 +1,5 @@
 import 'package:alcohol_logger/utility/bottomNav.dart';
+import 'package:alcohol_logger/utility/user_info.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,22 @@ class _HomeScreenState extends State<HomeScreen> {
     firstDayOfWeek = DateTime.now().subtract(Duration(days: DateTime.now().weekday)).toString().split(" ")[0];
 
     getWeeklyLog(firstDayOfWeek);
+    getUserInfo();
+  }
+
+  getUserInfo() async {
+    try {
+      final user = await auth.currentUser;
+      if (user != null) {
+        loggedInUser = user;
+      }
+      var docRef = _firestore.collection('userData').doc(loggedInUser.email);
+      DocumentSnapshot doc = await docRef.get();
+      final data = await doc.data() as Map<String, dynamic>;
+      //TODO: user_Info_Name = data["name"];
+    } catch (e) {
+      print(e);
+    }
   }
 
   getWeeklyLog(String day) async {
@@ -146,8 +163,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.lightBlueAccent,
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -181,15 +198,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Beer: 40oz",
+                          "Current BAC: 90%",
                           style: TextStyle(fontSize: 24),
                         ),
                         Text(
-                          "Red Wine: 10oz",
-                          style: TextStyle(fontSize: 24),
-                        ),
-                        Text(
-                          "White Wine: 8oz",
+                          "You are above legal limit",
                           style: TextStyle(fontSize: 24),
                         ),
                       ],

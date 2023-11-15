@@ -22,6 +22,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _auth = FirebaseAuth.instance;
   bool showSpinner = false;
   final FlutterSecureStorage _storage = FlutterSecureStorage();
+  final emailTextController = TextEditingController();
+  final passwordTextController = TextEditingController();
 
   @override
   void initState() {
@@ -34,8 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
     Map<String, String> loginCredentials = await _storage.readAll();
     email = loginCredentials.keys.toList().first;
     password = loginCredentials[email]!;
-    print(email);
-    print(password);
+    emailTextController.text = loginCredentials.keys.toList().first;
+    passwordTextController.text = loginCredentials[email]!;
   }
 
   SnackBar snackBar(String error) {
@@ -78,6 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 25, left: 10, right: 10, bottom: 25),
                     child: TextField(
+                        controller: emailTextController,
                         onChanged: (value) {
                           email = value;
                         },
@@ -89,6 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Padding(
                     padding: const EdgeInsets.only(left: 10, right: 10, bottom: 25),
                     child: TextField(
+                        controller: passwordTextController,
                         onChanged: (value) {
                           password = value;
                         },
