@@ -26,6 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+
     fetchSecureStorageData();
   }
 
@@ -33,6 +34,8 @@ class _LoginScreenState extends State<LoginScreen> {
     Map<String, String> loginCredentials = await _storage.readAll();
     email = loginCredentials.keys.toList().first;
     password = loginCredentials[email]!;
+    print(email);
+    print(password);
   }
 
   SnackBar snackBar(String error) {
@@ -104,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         try {
                           final user = await _auth.signInWithEmailAndPassword(email: email, password: password);
                           if (user != null) {
-                            _storage.write(key: email, value: password);
+                            await _storage.write(key: email, value: password);
                             Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
                           }
                         } catch (e) {

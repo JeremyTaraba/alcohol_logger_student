@@ -1,4 +1,3 @@
-import 'package:alcohol_logger/felix_image_preview_screen.dart';
 import 'package:alcohol_logger/image_preview_screen.dart';
 import 'package:alcohol_logger/utility/bottomNav.dart';
 import 'package:flutter/material.dart';
