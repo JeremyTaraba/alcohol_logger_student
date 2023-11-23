@@ -239,9 +239,31 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
                   var docRef = _firestore.collection("drinks").doc(loggedInUser.email);
                   DocumentSnapshot doc = await docRef.get();
                   final data = doc.data() as Map<String, dynamic>;
-                  Map<String, int> submittedInfo = {drinkSelected: ouncesEntered};
                   String date = DateTime.now().toString().split(" ")[0];
-                  await docRef.set({date: submittedInfo}, SetOptions(merge: true));
+                  Map<String, int> ouncesAndTime = {DateTime.now().toString(): ouncesEntered};
+                  if (data.containsKey(date)) {
+                    // if we have logged something today
+                    var data2 = data[date];
+                    if (data2.containsKey(drinkSelected)) {
+                      // if we have logged the drink today
+                      //all new stuff
+                      Map<String, dynamic> drinkData = data2[drinkSelected]; //copy data
+                      drinkData[DateTime.now().toString()] = ouncesEntered; //add new drink
+                      Map<String, Map<String, dynamic>> submittedInfo = {drinkSelected: drinkData};
+                      await docRef.set({date: submittedInfo}, SetOptions(merge: true));
+                    } else {
+                      // we have logged something but not this specific drink
+                      Map<String, Map<String, int>> submittedInfo = {drinkSelected: ouncesAndTime};
+
+                      await docRef.set({date: submittedInfo}, SetOptions(merge: true));
+                    }
+                  } else {
+                    // if we have never logged anything today
+                    Map<String, Map<String, int>> submittedInfo = {drinkSelected: ouncesAndTime};
+
+                    await docRef.set({date: submittedInfo}, SetOptions(merge: true));
+                  }
+
                   Navigator.popUntil(context, (route) {
                     return count++ == 2;
                   });

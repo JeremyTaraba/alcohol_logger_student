@@ -2,6 +2,7 @@ import 'package:alcohol_logger/home_screen.dart';
 import 'package:alcohol_logger/signup_screen.dart';
 import 'package:alcohol_logger/utility/buttons.dart';
 import 'package:alcohol_logger/utility/text_fields.dart';
+import 'package:alcohol_logger/utility/user_info.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -112,6 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           final user = await _auth.signInWithEmailAndPassword(email: email, password: password);
                           if (user != null) {
                             await _storage.write(key: email, value: password);
+                            getUserInfo();
                             Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
                           }
                         } catch (e) {

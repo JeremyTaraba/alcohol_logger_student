@@ -1,4 +1,5 @@
 import 'package:alcohol_logger/utility/bottomNav.dart';
+import 'package:alcohol_logger/utility/user_info.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,7 @@ final FlutterSecureStorage _storage = FlutterSecureStorage();
 int count = 0;
 late User loggedInUser;
 final _firestore = FirebaseFirestore.instance;
-Map<String, dynamic> userInformation = {};
+final weightTextController = TextEditingController();
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -25,30 +26,13 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String dropdownValue = list.first;
-
-  getUserInfo(Map<String, dynamic> userInformation) async {
-    try {
-      final user = await auth.currentUser;
-      if (user != null) {
-        loggedInUser = user;
-      }
-      var docRef = _firestore.collection('userData').doc(loggedInUser.email);
-      DocumentSnapshot doc = await docRef.get();
-      final data = await doc.data() as Map<String, dynamic>;
-      setState(() {
-        userInformation = data;
-        print(userInformation);
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
+  String dropdownValue = user_Info_Gender;
 
   @override
   void initState() {
     super.initState();
-    getUserInfo(userInformation);
+    getUserInfo();
+    weightTextController.text = user_Info_Weight.toString();
   }
 
   @override
@@ -62,8 +46,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                profileData("Name", userInformation["name"] == null ? "" : "hi"),
-                profileData("Weight", "100"),
+                profileData("Name", user_Info_Name),
+                const Padding(
+                  padding: EdgeInsets.only(left: 30.0),
+                  child: Text(
+                    "Weight",
+                    style: TextStyle(fontSize: 24),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Container(
+                    width: double.infinity,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.lightBlueAccent, width: 3),
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          onSubmitted: (value) {
+                            _firestore.collection("userData").doc(auth.currentUser?.email).update({
+                              "weight": int.parse(value),
+                            });
+                            user_Info_Weight = int.parse(value);
+                          },
+                          controller: weightTextController,
+                          keyboardType: TextInputType.number,
+                          style: TextStyle(fontSize: 24),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
                 const Padding(
                   padding: EdgeInsets.only(left: 30.0),
                   child: Text(
@@ -92,6 +110,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             // This is called when the user selects an item.
                             setState(() {
                               dropdownValue = value!;
+                              _firestore.collection("userData").doc(auth.currentUser?.email).update({
+                                "gender": value,
+                              });
+                              user_Info_Gender = value;
                             });
                           },
                           items: list.map<DropdownMenuItem<String>>((String value) {

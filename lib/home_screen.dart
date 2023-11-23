@@ -31,22 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
     firstDayOfWeek = DateTime.now().subtract(Duration(days: DateTime.now().weekday)).toString().split(" ")[0];
 
     getWeeklyLog(firstDayOfWeek);
-    getUserInfo();
-  }
-
-  getUserInfo() async {
-    try {
-      final user = await auth.currentUser;
-      if (user != null) {
-        loggedInUser = user;
-      }
-      var docRef = _firestore.collection('userData').doc(loggedInUser.email);
-      DocumentSnapshot doc = await docRef.get();
-      final data = await doc.data() as Map<String, dynamic>;
-      //TODO: user_Info_Name = data["name"];
-    } catch (e) {
-      print(e);
-    }
   }
 
   getWeeklyLog(String day) async {

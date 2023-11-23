@@ -49,6 +49,7 @@ class _CameraScreenState extends State<CameraScreen> {
                           }
 
                           try {
+                            await _controller.setFlashMode(FlashMode.off);
                             await _controller.setFocusMode(FocusMode.locked);
 
                             XFile picture = await _controller.takePicture();
