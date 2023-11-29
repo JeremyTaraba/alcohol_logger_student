@@ -1,4 +1,5 @@
 import 'package:alcohol_logger/utility/bottomNav.dart';
+import 'package:alcohol_logger/utility/calculatingBAC.dart';
 import 'package:alcohol_logger/utility/user_info.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     firstDayOfWeek = DateTime.now().subtract(Duration(days: DateTime.now().weekday)).toString().split(" ")[0];
 
     getWeeklyLog(firstDayOfWeek);
+    getBloodAlcoholLevel();
   }
 
   getWeeklyLog(String day) async {

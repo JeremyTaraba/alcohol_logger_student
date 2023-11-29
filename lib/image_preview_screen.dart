@@ -243,14 +243,13 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
                   Map<String, int> ouncesAndTime = {DateTime.now().toString(): ouncesEntered};
                   if (data.containsKey(date)) {
                     // if we have logged something today
-                    var data2 = data[date];
+                    var data2 = data[date]; // map of drinks logged today
                     if (data2.containsKey(drinkSelected)) {
                       // if we have logged the drink today
-                      //all new stuff
-                      Map<String, dynamic> drinkData = data2[drinkSelected]; //copy data
+                      Map<String, dynamic> drinkData = data2[drinkSelected]; //copying the data
                       drinkData[DateTime.now().toString()] = ouncesEntered; //add new drink
-                      Map<String, Map<String, dynamic>> submittedInfo = {drinkSelected: drinkData};
-                      await docRef.set({date: submittedInfo}, SetOptions(merge: true));
+                      Map<String, Map<String, dynamic>> submittedInfo = {drinkSelected: drinkData}; // create drink and time
+                      await docRef.set({date: submittedInfo}, SetOptions(merge: true)); // updates the database
                     } else {
                       // we have logged something but not this specific drink
                       Map<String, Map<String, int>> submittedInfo = {drinkSelected: ouncesAndTime};
