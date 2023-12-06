@@ -32,7 +32,6 @@ class _HomeScreenState extends State<HomeScreen> {
     firstDayOfWeek = DateTime.now().subtract(Duration(days: DateTime.now().weekday)).toString().split(" ")[0];
 
     getWeeklyLog(firstDayOfWeek);
-    getBloodAlcoholLevel();
   }
 
   getWeeklyLog(String day) async {
@@ -47,10 +46,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
       for (int i = 0; i < 7; i++) {
         if (data.keys.contains(day)) {
+          //each day
           int sum = 0;
-          data[day].forEach((innerKey, innerValue) {
-            // goes through each drink at date
-            sum += innerValue as int;
+          data[day].forEach((drinkType, timeAndAmount) {
+            // each drink type
+            timeAndAmount.forEach((time, amount) {
+              //each time and amount
+              sum += amount as int;
+            });
           });
 
           setState(() {
@@ -183,14 +186,26 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Current BAC: 90%",
-                          style: TextStyle(fontSize: 24),
-                        ),
-                        Text(
-                          "You are above legal limit",
-                          style: TextStyle(fontSize: 24),
-                        ),
+                        FutureBuilder<String>(
+                            future: getBloodAlcoholLevel(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return Column(
+                                  children: [
+                                    Text(
+                                      "Current BAC: ${snapshot.data}%",
+                                      style: TextStyle(fontSize: 24),
+                                    ),
+                                    Text(
+                                      double.parse(snapshot.data!) > 0.08 ? "You are above legal limit" : "You are under legal limit",
+                                      style: TextStyle(fontSize: 24),
+                                    ),
+                                  ],
+                                );
+                              } else {
+                                return Container();
+                              }
+                            }),
                       ],
                     ),
                   ),

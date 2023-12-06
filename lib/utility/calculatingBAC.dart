@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:alcohol_logger/utility/user_info.dart';
+import 'package:flutter/material.dart';
 
 // gender constants
 double maleConstant = 0.68;
@@ -12,7 +13,7 @@ double redWineAlcoholPercent = 0.135;
 double whiteWineAlcoholPercent = 0.12;
 double cocktailAlcoholPercent = 0.22;
 
-getBloodAlcoholLevel() async {
+Future<String> getBloodAlcoholLevel() async {
   final _firestore = FirebaseFirestore.instance; //for the database
   final auth = FirebaseAuth.instance;
   late User loggedInUser;
@@ -57,9 +58,12 @@ getBloodAlcoholLevel() async {
       }
     });
     print(sum);
+
+    return sum.toStringAsFixed(2);
   } catch (e) {
     print(e);
   }
+  return "0";
 }
 
 //get each drink in a list of maps of maps

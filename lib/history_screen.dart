@@ -145,9 +145,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       data.forEach((key, value) {
         // goes through each date
-        data[key].forEach((innerKey, innerValue) {
-          // goes through each drink at date
-          listOfDrinks.add(Event("$innerKey: ${innerValue.toString()} oz")); //adding each drink to the list
+        data[key].forEach((drinkType, timeAndAmount) {
+          // goes through each drink type
+          int sum = 0;
+          timeAndAmount.forEach((time, amount) {
+            //each time and amount
+            sum += amount as int;
+          });
+          listOfDrinks.add(Event("$drinkType: ${sum.toString()} oz")); //adding each drink to the list
         });
         events[DateTime.parse("$key 00:00:00.000")] = listOfDrinks.toList(); //create the event
         listOfDrinks.clear(); //clear the drinks for the next event

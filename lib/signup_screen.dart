@@ -2,11 +2,15 @@ import 'package:alcohol_logger/home_screen.dart';
 import 'package:alcohol_logger/login_screen.dart';
 import 'package:alcohol_logger/utility/buttons.dart';
 import 'package:alcohol_logger/utility/text_fields.dart';
+import 'package:alcohol_logger/utility/user_info.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+final _firestore = FirebaseFirestore.instance;
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -64,8 +68,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       height: 200,
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsets.only(top: 25, left: 10, right: 10),
+                      padding: const EdgeInsets.only(top: 25, left: 10, right: 10),
                       child: TextFormField(
                         onChanged: (value) {
                           name = value;
@@ -81,21 +84,17 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: TextStyle(fontSize: 22),
                         autocorrect: false,
                         keyboardType: TextInputType.text,
-                        decoration:
-                            kTextFieldDecoration().copyWith(hintText: "Name"),
+                        decoration: kTextFieldDecoration().copyWith(hintText: "Name"),
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                          top: 25, left: 10, right: 10, bottom: 25),
+                      padding: const EdgeInsets.only(top: 25, left: 10, right: 10, bottom: 25),
                       child: TextFormField(
                         onChanged: (value) {
                           email = value;
                         },
                         validator: (String? value) {
-                          if (value != null &&
-                              value.contains('@') &&
-                              value.contains('.')) {
+                          if (value != null && value.contains('@') && value.contains('.')) {
                             return null;
                           } else {
                             return "Enter a valid email";
@@ -105,13 +104,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: TextStyle(fontSize: 22),
                         autocorrect: false,
                         keyboardType: TextInputType.emailAddress,
-                        decoration:
-                            kTextFieldDecoration().copyWith(hintText: "Email"),
+                        decoration: kTextFieldDecoration().copyWith(hintText: "Email"),
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                          left: 10, right: 10, bottom: 25),
+                      padding: const EdgeInsets.only(left: 10, right: 10, bottom: 25),
                       child: TextFormField(
                         onChanged: (value) {
                           password = value;
@@ -128,13 +125,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         autocorrect: false,
                         obscureText: true,
                         keyboardType: TextInputType.text,
-                        decoration: kTextFieldDecoration()
-                            .copyWith(hintText: "Password"),
+                        decoration: kTextFieldDecoration().copyWith(hintText: "Password"),
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                          left: 10, right: 10, bottom: 25),
+                      padding: const EdgeInsets.only(left: 10, right: 10, bottom: 25),
                       child: TextFormField(
                         onChanged: (value) {
                           confirmPassword = value;
@@ -151,8 +146,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         autocorrect: false,
                         obscureText: true,
                         keyboardType: TextInputType.text,
-                        decoration: kTextFieldDecoration()
-                            .copyWith(hintText: "Confirm Password"),
+                        decoration: kTextFieldDecoration().copyWith(hintText: "Confirm Password"),
                       ),
                     ),
                     Center(child: SignUpButton(
@@ -162,14 +156,20 @@ class _SignupScreenState extends State<SignupScreen> {
                             showSpinner = true;
                           });
                           try {
-                            final newUser =
-                                await _auth.createUserWithEmailAndPassword(
-                                    email: email, password: password);
+                            final newUser = await _auth.createUserWithEmailAndPassword(email: email, password: password);
                             if (newUser != null) {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => HomeScreen()));
+                              await _firestore.collection("drinks").doc(email).set({});
+                              await _firestore.collection("userData").doc(email).set({
+                                'name': name,
+                                'gender': "Prefer not to say",
+                                'weight': 1,
+                              });
+
+                              user_Info_Name = name;
+                              user_Info_Gender = "Prefer not to say";
+                              user_Info_Weight = 1;
+
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
                             }
                           } catch (e) {
                             print(e);
@@ -199,15 +199,11 @@ class _SignupScreenState extends State<SignupScreen> {
                               ),
                               GestureDetector(
                                 onTap: () {
-                                  Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => LoginScreen()));
+                                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
                                 },
                                 child: Text(
                                   "Login",
-                                  style: TextStyle(
-                                      color: Colors.blue, fontSize: 20),
+                                  style: TextStyle(color: Colors.blue, fontSize: 20),
                                 ),
                               ),
                             ],

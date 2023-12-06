@@ -50,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const Padding(
                   padding: EdgeInsets.only(left: 30.0),
                   child: Text(
-                    "Weight",
+                    "Weight (lbs)",
                     style: TextStyle(fontSize: 24),
                   ),
                 ),
