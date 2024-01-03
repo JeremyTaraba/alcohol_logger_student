@@ -113,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           final user = await _auth.signInWithEmailAndPassword(email: email, password: password);
                           if (user != null) {
                             await _storage.write(key: email, value: password);
-                            getUserInfo();
+                            await getUserInfo();
                             Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
                           }
                         } catch (e) {

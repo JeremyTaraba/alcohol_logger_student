@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:484907298486:android:d8bd0f5875f90ec4a70017",
         "android_client_info": {
-          "package_name": "com.example.alcohol_logger"
+          "package_name": "com.jeremytaraba.alcohol_logger"
         }
       },
       "oauth_client": [
